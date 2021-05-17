@@ -26,3 +26,13 @@ class SuperClub < ActiveRecord::Base
   has_many :memberships, class_name: "SuperMembership", foreign_key: "club_id"
   has_many :members, through: :memberships
 end
+
+class BestClub < ActiveRecord::Base
+  self.table_name = "clubs"
+
+  has_many :memberships, -> { includes(member: [:nested_sponsors]).order('members.name') }, dependent: :destroy,
+  inverse_of: false, foreign_key: "club_id"
+
+  has_many :members, through: :memberships
+  has_many :favorites, -> { where(memberships: { favorite: true }) }, through: :memberships, source: :member
+end

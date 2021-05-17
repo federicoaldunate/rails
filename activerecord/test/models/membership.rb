@@ -1,10 +1,16 @@
 # frozen_string_literal: true
 
 class Membership < ActiveRecord::Base
-  enum type: %i(Membership CurrentMembership SuperMembership SelectedMembership TenantMembership)
+  enum type: %i(Membership BestMembership CurrentMembership SuperMembership SelectedMembership TenantMembership)
   belongs_to :member
   belongs_to :club
 end
+
+class BestMembership < Membership
+  belongs_to :member
+  belongs_to :club, class_name: 'BestClub'
+end
+
 
 class CurrentMembership < Membership
   belongs_to :member

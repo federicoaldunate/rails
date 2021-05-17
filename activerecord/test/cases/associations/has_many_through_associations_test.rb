@@ -29,6 +29,7 @@ require "models/categorization"
 require "models/member"
 require "models/membership"
 require "models/club"
+require "models/sponsor"
 require "models/organization"
 require "models/user"
 require "models/family"
@@ -1462,6 +1463,22 @@ class HasManyThroughAssociationsTest < ActiveRecord::TestCase
         companies: [Company.create]
       )
     end
+  end
+
+  def test_should_generate_query_without_duplicates
+    club = BestClub.create!(name: 'Football')
+
+    main_sponsor = BestSponsor.create!(sponsor_club: club)
+    member = Member.create!(name: 'Groucho Merx', best_sponsor: main_sponsor)
+    BestSponsor.create!(sponsor_club: club, sponsor: main_sponsor)
+    BestSponsor.create!(sponsor_club: club, sponsor: main_sponsor)
+    club.memberships << Membership.create!(member: member, favorite: true)
+
+    main_sponsor = BestSponsor.create!(sponsor_club: club)
+    member = Member.create!(name: 'Groucho Merx', best_sponsor: main_sponsor)
+    club.memberships << Membership.create!(member: member, favorite: true)
+
+    assert_equal club.favorites.count, 2
   end
 
   def test_has_many_through_update_ids_with_conditions

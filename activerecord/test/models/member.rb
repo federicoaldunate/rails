@@ -9,6 +9,7 @@ class Member < ActiveRecord::Base
   has_one :favorite_club, -> { where "memberships.favorite = ?", true }, through: :membership, source: :club
   has_one :hairy_club, -> { where clubs: { name: "Moustache and Eyebrow Fancier Club" } }, through: :membership, source: :club
   has_one :sponsor, as: :sponsorable
+  has_one :best_sponsor, as: :sponsorable, class_name: "BestSponsor"
   has_one :sponsor_club, through: :sponsor
   has_one :member_detail, inverse_of: false
   has_one :organization, through: :member_detail
