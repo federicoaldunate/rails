@@ -9,11 +9,11 @@ module Rails
       UNIQ_INDEX_OPTIONS = %w(uniq)
 
       attr_accessor :name, :type
-      attr_reader   :attr_options
+      attr_reader   :attr_options, :namespace
       attr_writer   :index_name
 
       class << self
-        def parse(column_definition)
+        def parse(column_definition, namespace: nil)
           name, type, has_index = column_definition.split(":")
 
           # if user provided "name:index" instead of "name:string:index"
@@ -30,7 +30,7 @@ module Rails
             end
           end
 
-          new(name, type, has_index, attr_options)
+          new(name, type, has_index, attr_options, namespace)
         end
 
         def reference?(type)
@@ -58,12 +58,13 @@ module Rails
           end
       end
 
-      def initialize(name, type = nil, index_type = false, attr_options = {})
+      def initialize(name, type = nil, index_type = false, attr_options = {}, namespace = nil)
         @name           = name
         @type           = type || :string
         @has_index      = INDEX_OPTIONS.include?(index_type)
         @has_uniq_index = UNIQ_INDEX_OPTIONS.include?(index_type)
         @attr_options   = attr_options
+        @namespace = namespace
       end
 
       def field_type
@@ -179,7 +180,7 @@ module Rails
       def inject_index_options
         has_uniq_index? ? ", unique: true" : ""
       end
-
+      require 'byebug'
       def options_for_migration
         @attr_options.dup.tap do |options|
           if required?
@@ -187,7 +188,11 @@ module Rails
           end
 
           if reference? && !polymorphic?
-            options[:foreign_key] = true
+            if namespace.present?
+              options[:foreign_key] = { to_table: (namespace + [singular_name]).join("_") }
+            else
+              options[:foreign_key] = true
+            end
           end
         end
       end

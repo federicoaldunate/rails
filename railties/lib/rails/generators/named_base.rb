@@ -181,7 +181,8 @@ module Rails
         # Convert attributes array into GeneratedAttribute objects.
         def parse_attributes!
           self.attributes = (attributes || []).map do |attr|
-            Rails::Generators::GeneratedAttribute.parse(attr)
+            byebug
+            Rails::Generators::GeneratedAttribute.parse(attr, namespace: class_path)
           end
         end
 
