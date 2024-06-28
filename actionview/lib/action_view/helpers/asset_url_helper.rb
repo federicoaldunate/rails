@@ -192,8 +192,7 @@ module ActionView
         return source if URI_REGEXP.match?(source)
 
         tail, source = source[/([?#].+)$/], source.sub(/([?#].+)$/, "")
-
-        if extname = compute_asset_extname(source, options)
+        if options[:extname] != false && extname = compute_asset_extname(source, options)
           source = "#{source}#{extname}"
         end
 
@@ -241,7 +240,6 @@ module ActionView
       # Compute extname to append to asset path. Returns +nil+ if
       # nothing should be added.
       def compute_asset_extname(source, options = {})
-        return if options[:extname] == false
         extname = options[:extname] || ASSET_EXTENSIONS[options[:type]]
         if extname && File.extname(source) != extname
           extname
